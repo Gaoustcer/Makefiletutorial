@@ -1,0 +1,52 @@
+# C++项目构建——CMake and Makefile
+
+## Makefile
+
+### 介绍
+
+如何编译和链接源代码，规则是
+
+1. 工程没有被编译过，编译所有C文件并连接
+2. 工程中修改几个c文件，只编译修改的c文件，并重新连接
+3. 头文件被修改，重新编译引用头文件的c文件
+
+规则
+
+```makefile
+target ...: prerequisites ...
+	command
+	...
+	...
+```
+
+1. target 目标文件/可执行文件/标签
+2. prerequisites 生成target以来的文件
+3. command 生成target执行的命令
+
+> prerequisite包含一个文件比target要新，执行command命令
+
+### `Makefile`执行
+
+执行`make`命令
+
+1. 寻找Makefile文件
+2. 寻找第一个目标文件，作为最终目标文件
+3. 寻找依赖文件，不存在则寻找依赖文件的生成规则
+
+### 自动推导
+
+`Make`命令对于$*.o$文件会自动将$*.c$文件家在依赖关系中，以下两个Makefile等价
+
+```makefile
+main: main.cpp head.o
+	cc main.cpp head.o -o main
+head.o: head.h
+```
+
+```makefile
+main: main.cpp head.o
+	cc main.cpp head.o -o main
+head.o: head.h head.cpp
+	cc head.cpp -c -o head.o
+```
+
