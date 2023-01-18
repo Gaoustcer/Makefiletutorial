@@ -25,7 +25,7 @@ target ...: prerequisites ...
 
 > prerequisite包含一个文件比target要新，执行command命令
 
-### `Makefile`执行
+#### `Makefile`执行
 
 执行`make`命令
 
@@ -33,7 +33,7 @@ target ...: prerequisites ...
 2. 寻找第一个目标文件，作为最终目标文件
 3. 寻找依赖文件，不存在则寻找依赖文件的生成规则
 
-### 自动推导
+#### 自动推导
 
 `Make`命令对于$*.o$文件会自动将$*.c$文件家在依赖关系中，以下两个Makefile等价
 
@@ -50,3 +50,29 @@ head.o: head.h head.cpp
 	cc head.cpp -c -o head.o
 ```
 
+#### 清除目标文件
+
+`make clean`用于删除编译生成的中间文件，推荐的写法是
+
+```makefile
+clean:
+	-rm $(object)
+```
+
+避免遇到不存在的文件导致命令终止
+
+#### What is in Makefile
+
+1. 显式规则
+2. 隐式规则
+3. 定义变量
+4. 文件指示 #include另一个Makefile或者定义多行命令
+5. 注释
+
+### Makefile规则
+
+规则=依赖关系+生成目标的方法
+
+#### 通配符
+
+1. ~的使用 `~/test`表示home目录下的test子目录，`~chen/test`表示用户chen所属的home目录
