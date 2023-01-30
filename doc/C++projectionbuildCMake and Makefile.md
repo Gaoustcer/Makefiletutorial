@@ -152,7 +152,20 @@ cc -M main.c
 main.o: main.c defs.h
 ```
 
-用gcc/g++需要使用-MM选项避免包含标准库依赖
+用gcc/g++需要使用-MM选项避免包含标准库依赖。建议为每个`.c`文件生成`.d`对应的`Makefile`文件，在`.d`文件中存放`.c`的依赖关系。
+
+make自动更新/生成`.d`文件
+
+```makefile
+%.d: %.c
+    @set -e; rm -f $@; \
+    $(CC) -M $(CPPFLAGS) $< > $@.$$$$; \
+    sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+    rm -f $@.$$$$
+```
+
+1. 所有`.d`文件依赖`.c`文件，`rm -d $@`删除所有的目标
+2. 每个依赖文件`.c`生成依赖文件 $@表示模式为`%.d`的文件
 
 ### Makefile下的多目录编译
 
@@ -199,3 +212,125 @@ cc src/foo.c -o all
 ```
 
 不能直接在command中调用`foo.c`，会导致文件找不到
+
+### 命令
+
+#### 显示命令
+
+makefile默认回显每条command，希望不要回显需要在命令行前加上@
+
+```makefile
+@echo compile
+```
+
+#### 命令执行
+
+依赖比目标更新，make会执行所有命令，**命令之间存在依赖关系则需要使用;分割并且需要在用一行**
+
+#### 命令出错
+
+在命令前加上-避免命令出错
+
+#### 嵌套执行make
+
+子目录subdir下存在makefile用于编译子目录下文件的编译过程，父目录下编译子目录下对象写成
+
+```makefile
+subsystem:
+	cd subdir; $(MAKE)
+```
+
+等价于
+
+```makefile
+subsystem:
+	$(MAKE) -C subdir
+```
+
+传递变量到下级makefile中，可以使用
+
+```makefile
+export <variablelist>
+```
+
+比如
+
+```makefile
+export variable = value
+```
+
+等价于
+
+```makefile
+variable = value
+export variable
+```
+
+或者
+
+```makefile
+export variable := value
+```
+
+## `Makefile`变量和自动化变量
+
+`Makefile`定义的变量有点类似MACRO
+
+### 变量基础
+
+使用=定义变量，可以用其它变量定义变量
+
+```makefile
+goo=$(bar)
+bar=hello
+all:
+	echo $(bar)
+```
+
+> 定义`goo`并未定义`bar`的值，可以借助后面的值缺省定义，这样可以根据真实值推断不同的变量。需要避免递归定义
+
+调用变量需要用$，例如`$(varname)`，变量会在调用处精确展开为字符串序列
+
+使用`:=`定义变量
+
+```makefile
+x := foo
+y := $(x) bar
+x := later
+```
+
+此时y的值是`foo bar`而不是`later bar`，有点类似编译时求值和运行时求值的区别
+
+makefile提供了一些系统变量，比如MAKELEVEL是makefile执行的层次
+
+定义变量控制是否包含空格可以借助#，比如
+
+```makefile
+dir := /foo/bar #command
+```
+
+则dir带一个空格
+
+```makefile
+dir := /foo/bar#command
+```
+
+不包含空格
+
+操作符`?=`功能是
+
+1. 如果变量未定义，则定义变量并采用右值
+2. 变量已经定义，则为空语句
+
+### 系统变量
+
+| 变量名 | 含义 |
+| ------ | ---- |
+| $*     |      |
+| $+     |      |
+| $<     |      |
+| $?     |      |
+| $@     |      |
+| $^     |      |
+
+$%
