@@ -341,3 +341,34 @@ dir := /foo/bar#command
 | $@     | 目标文件完整名称               |
 | $^     | 不重复的依赖文件               |
 
+## 调用函数和条件判断
+
+### 条件判断
+
+语法是
+
+```makefile
+<conditional-directive>
+<text-if-true>
+endif
+```
+
+或者
+
+```makefile
+<conditional-directive>
+<text-if-true>
+else
+<text-if-false>
+endif
+```
+
+`conditional-directive`是条件关键字，包括
+
+```makefile
+ifeq (arg1,arg2)
+ifdef <variable name> # 测试变量是否有值，如果未赋值则不执行，不如idef foo
+ifneq (arg1,arg2) # 不相等则执行
+ifndef <variable name> # 变量值未定义则执行
+```
+

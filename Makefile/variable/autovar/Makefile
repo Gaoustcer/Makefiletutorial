@@ -1,2 +1,3 @@
-all: hello
-hello: hello.c
+all: hello.out
+hello.out: hello.c
+	@echo ${CC}
